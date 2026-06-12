@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F4D03F"/>
+      <stop offset="50%" stop-color="#D4AF37"/>
+      <stop offset="100%" stop-color="#B8960C"/>
+    </linearGradient>
+  </defs>
+  <!-- Background circle (matte black) -->
+  <circle cx="32" cy="32" r="30" fill="#0D0D0D" stroke="url(#gold)" stroke-width="3"/>
+  <!-- Crown -->
+  <path d="M 14 26 L 20 14 L 26 22 L 32 12 L 38 22 L 44 14 L 50 26 L 48 30 L 16 30 Z"
+        fill="url(#gold)" stroke="#B8960C" stroke-width="1" stroke-linejoin="round"/>
+  <!-- Letter K -->
+  <text x="32" y="48" font-family="Montserrat, Arial, sans-serif" font-weight="900"
+        font-size="26" text-anchor="middle" fill="url(#gold)">K</text>
+</svg>
