@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>King Javi | Clases 3D, Rigging & Desarrollo de Videojuegos</title>
+    <meta name="description" content="Aprende 3D, rigging, animación y desarrollo de videojuegos con Javier Torralba. Clases particulares online para todos los niveles. Primera clase GRATIS.">
+    <meta name="keywords" content="clases 3D, rigging, animación, maya, blender, zbrush, videojuegos, desarrollo游戏">
+    <meta name="author" content="Javier Torralba Sánchez">
+    <meta property="og:title" content="King Javi | Clases 3D & Desarrollo de Videojuegos">
+    <meta property="og:description" content="Aprende 3D, rigging y desarrollo de videojuegos con un experto. Primera clase GRATIS.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" href="https://agent-cdn.minimax.io/mcp/cdn_upload/480162612876587013/407657836060928/1781095395_5d66f4ce.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --gold: #D4AF37;
+            --gold-light: #F4D03F;
+            --gold-dark: #B8960C;
+            --silver: #C0C0C0;
+            --blue-metal: #1E90FF;
+            --blue-dark: #0A1628;
+            --black-matte: #0D0D0D;
+            --white: #FFFFFF;
+            --gray: #888888;
+            --gradient-gold: linear-gradient(135deg, #D4AF37, #F4D03F, #D4AF37);
+            --shadow-gold: 0 10px 40px rgba(212, 175, 55, 0.3);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; background: var(--black-matte); color: var(--white); overflow-x: hidden; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--black-matte); }
+        ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 4px; }
+        
+        /* Loader */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: var(--black-matte);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            transition: opacity 0.5s, visibility 0.5s;
+        }
+        #loader.hidden { opacity: 0; visibility: hidden; }
+        .loader-crown {
+            font-size: 4rem;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px var(--gold)); }
+            50% { transform: scale(1.1); filter: drop-shadow(0 0 30px var(--gold)); }
+        }
+        
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            background: rgba(13, 13, 13, 0.95);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+            transition: all 0.3s;
+        }
+        nav.scrolled { padding: 0.7rem 2rem; box-shadow: 0 5px 30px rgba(0,0,0,0.5); }
+        
+        .logo { display: flex; align-items: center; gap: 0.8rem; text-decoration: none; }
+        .logo img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--gold); transition: transform 0.3s; }
+        .logo:hover img { transform: rotate(360deg); }
+        .logo-text { font-family: 'Montserrat', sans-serif; font-size: 1.3rem; font-weight: 800; background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo-sub { font-size: 0.65rem; color: var(--gray); letter-spacing: 2px; text-transform: uppercase; }
+        
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-links a { color: var(--silver); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.3s; position: relative; }
+        .nav-links a::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px; background: var(--gold); transition: width 0.3s; }
+        .nav-links a:hover { color: var(--gold); }
+        .nav-links a:hover::after { width: 100%; }
+        
+        .nav-cta { padding: 0.7rem 1.5rem; background: var(--gradient-gold); color: var(--black-matte); font-weight: 700; border-radius: 50px; text-decoration: none; transition: all 0.3s; font-size: 0.9rem; }
+        .nav-cta:hover { transform: translateY(-2px); box-shadow: var(--shadow-gold); }
+        
+        .menu-toggle { display: none; background: none; border: 2px solid var(--gold); padding: 0.5rem; border-radius: 8px; cursor: pointer; }
+        .menu-toggle span { display: block; width: 25px; height: 2px; background: var(--gold); margin: 5px 0; transition: 0.3s; }
+        
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        #hero-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .hero-content {
+            text-align: center;
+            max-width: 900px;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border: 1px solid var(--gold);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--gold);
+            margin-bottom: 2rem;
+            animation: glow 2s infinite;
+        }
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(212, 175, 55, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(212, 175, 55, 0.8), 0 0 40px rgba(212, 175, 55, 0.4); }
+        }
+        .hero h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+        .hero h1 .gold { background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-subtitle { font-size: 1.2rem; color: var(--silver); line-height: 1.8; margin-bottom: 2.5rem; max-width: 700px; margin-left: auto; margin-right: auto; }
+        .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        
+        .btn { padding: 1rem 2.5rem; border-radius: 50px; font-weight: 600; text-decoration: none; transition: all 0.3s; font-size: 1rem; cursor: pointer; border: none; display: inline-block; }
+        .btn-gold { background: var(--gradient-gold); color: var(--black-matte); }
+        .btn-gold:hover { transform: translateY(-3px); box-shadow: var(--shadow-gold); }
+        .btn-outline { background: transparent; color: var(--white); border: 2px solid var(--silver); }
+        .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+        
+        .scroll-indicator {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+        .scroll-indicator span { display: block; width: 30px; height: 50px; border: 2px solid var(--gold); border-radius: 20px; position: relative; }
+        .scroll-indicator span::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            width: 6px;
+            height: 6px;
+            background: var(--gold);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            animation: scroll-dot 2s infinite;
+        }
+        @keyframes bounce { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(10px); } }
+        @keyframes scroll-dot { 0% { opacity: 1; top: 8px; } 100% { opacity: 0; top: 30px; } }
+        
+        /* Stats */
+        .stats-bar {
+            background: rgba(212, 175, 55, 0.05);
+            padding: 4rem 2rem;
+            border-top: 1px solid rgba(212, 175, 55, 0.2);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; max-width: 1200px; margin: 0 auto; text-align: center; }
+        .stat-item h3 { font-family: 'Montserrat', sans-serif; font-size: 3rem; font-weight: 900; background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-item p { color: var(--silver); font-size: 0.95rem; margin-top: 0.5rem; }
+        
+        /* Sections */
+        section { padding: 6rem 2rem; }
+        .section-header { text-align: center; margin-bottom: 4rem; }
+        .section-tag { display: inline-block; padding: 0.4rem 1.2rem; background: rgba(212, 175, 55, 0.1); border: 1px solid var(--gold); border-radius: 50px; font-size: 0.8rem; color: var(--gold); margin-bottom: 1rem; }
+        .section-title { font-family: 'Montserrat', sans-serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; }
+        
+        /* About */
+        .about { background: var(--black-matte); }
+        .about-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 4rem; max-width: 1200px; margin: 0 auto; align-items: center; }
+        .about-image { position: relative; }
+        .about-image img { width: 100%; border-radius: 20px; border: 2px solid var(--gold); }
+        .about-image::before { content: ''; position: absolute; top: -15px; right: -15px; width: 100%; height: 100%; border: 2px solid var(--gold); border-radius: 20px; z-index: -1; }
+        .about-text h3 { font-family: 'Montserrat', sans-serif; font-size: 2rem; margin-bottom: 1.5rem; }
+        .about-text p { color: var(--silver); line-height: 1.9; margin-bottom: 1rem; font-size: 1.05rem; }
+        .about-text .highlight { color: var(--gold); font-weight: 500; }
+        
+        .tools-grid { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 2rem; }
+        .tool-tag { padding: 0.4rem 1rem; background: rgba(30, 144, 255, 0.1); border: 1px solid var(--blue-metal); border-radius: 50px; font-size: 0.8rem; color: var(--blue-metal); }
+        
+        /* Services */
+        .services { background: var(--blue-dark); }
+        .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; max-width: 1200px; margin: 0 auto; }
+        .service-card {
+            background: rgba(13, 13, 13, 0.8);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        .service-card:hover::before { left: 100%; }
+        .service-card:hover { transform: translateY(-10px); border-color: var(--gold); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(212, 175, 55, 0.1); }
+        .service-icon { font-size: 3.5rem; margin-bottom: 1.5rem; }
+        .service-card h3 { font-family: 'Montserrat', sans-serif; font-size: 1.3rem; margin-bottom: 1rem; }
+        .service-card p { color: var(--silver); line-height: 1.7; font-size: 0.95rem; }
+        
+        /* Pricing */
+        .pricing { background: var(--black-matte); }
+        .pricing-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; max-width: 1200px; margin: 0 auto; }
+        .price-card {
+            background: var(--blue-dark);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .price-card.featured { background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(30, 144, 255, 0.1)); border-color: var(--gold); transform: scale(1.05); }
+        .price-card:hover { transform: translateY(-8px); }
+        .price-card.featured:hover { transform: scale(1.05) translateY(-8px); }
+        .price-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 0.4rem 1.2rem; background: var(--gradient-gold); color: var(--black-matte); font-size: 0.75rem; font-weight: 700; border-radius: 50px; }
+        .price-card h4 { font-family: 'Montserrat', sans-serif; font-size: 1.2rem; margin-bottom: 0.5rem; margin-top: 0.5rem; }
+        .price { font-family: 'Montserrat', sans-serif; font-size: 2.8rem; font-weight: 900; background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .price span { font-size: 1rem; color: var(--silver); }
+        .price-card ul { list-style: none; margin: 1.5rem 0; text-align: left; }
+        .price-card li { color: var(--silver); font-size: 0.9rem; padding: 0.6rem 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .price-card li::before { content: '✓ '; color: var(--gold); }
+        
+        /* Community */
+        .community { background: linear-gradient(135deg, var(--blue-dark) 0%, var(--black-matte) 100%); }
+        .community-content { max-width: 900px; margin: 0 auto; text-align: center; }
+        .community h2 { font-family: 'Montserrat', sans-serif; font-size: 2.5rem; margin-bottom: 1.5rem; }
+        .community > .community-content > p { color: var(--silver); font-size: 1.15rem; line-height: 1.8; margin-bottom: 3rem; }
+        .community-features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-bottom: 3rem; }
+        .community-feature { background: rgba(255,255,255,0.03); padding: 2rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); transition: all 0.3s; }
+        .community-feature:hover { border-color: var(--gold); transform: translateY(-5px); }
+        .community-feature .icon { font-size: 3rem; margin-bottom: 1rem; }
+        .community-feature h4 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+        .community-feature p { color: var(--gray); font-size: 0.9rem; margin: 0; }
+        
+        /* FAQ */
+        .faq { background: var(--black-matte); }
+        .faq-list { max-width: 800px; margin: 0 auto; }
+        .faq-item { background: var(--blue-dark); border-radius: 16px; margin-bottom: 1rem; border: 1px solid rgba(212, 175, 55, 0.1); overflow: hidden; }
+        .faq-question { padding: 1.5rem 2rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 600; transition: all 0.3s; }
+        .faq-question:hover { color: var(--gold); }
+        .faq-question .icon { transition: transform 0.3s; font-size: 1.5rem; }
+        .faq-item.active .faq-question .icon { transform: rotate(45deg); color: var(--gold); }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .faq-item.active .faq-answer { max-height: 300px; }
+        .faq-answer p { padding: 0 2rem 1.5rem; color: var(--silver); line-height: 1.7; }
+        
+        /* Testimonials */
+        .testimonials { background: var(--blue-dark); }
+        .testimonials-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; max-width: 1000px; margin: 0 auto; }
+        .testimonial-card { background: rgba(13, 13, 13, 0.6); padding: 2rem; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.1); position: relative; }
+        .testimonial-card .quote { font-size: 4rem; color: var(--gold); opacity: 0.3; position: absolute; top: 10px; left: 20px; line-height: 1; }
+        .testimonial-card .stars { color: var(--gold); font-size: 1.1rem; margin-bottom: 1rem; }
+        .testimonial-card p { color: var(--silver); font-style: italic; line-height: 1.8; margin-bottom: 1.5rem; font-size: 1.05rem; position: relative; z-index: 1; }
+        .testimonial-card .author { color: var(--white); font-weight: 600; }
+        
+        /* Gallery */
+        .gallery { background: var(--black-matte); }
+        .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; max-width: 1200px; margin: 0 auto; }
+        .gallery-item { position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 1; }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; }
+        .gallery-item:hover img { transform: scale(1.1); }
+        .gallery-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.95), transparent 60%); display: flex; flex-direction: column; justify-content: flex-end; padding: 1.5rem; opacity: 0; transition: opacity 0.3s; }
+        .gallery-item:hover .gallery-overlay { opacity: 1; }
+        .gallery-overlay h4 { font-size: 1rem; margin-bottom: 0.3rem; }
+        .gallery-overlay p { color: var(--silver); font-size: 0.85rem; margin: 0; }
+        .gallery-cta { text-align: center; margin-top: 3rem; }
+        .gallery-cta p { color: var(--silver); margin-bottom: 1rem; }
+        
+        /* CTA Banner */
+        .cta-banner {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(30, 144, 255, 0.1));
+            border-top: 1px solid rgba(212, 175, 55, 0.3);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+            text-align: center;
+            padding: 5rem 2rem;
+        }
+        .cta-banner h2 { font-family: 'Montserrat', sans-serif; font-size: 2.5rem; margin-bottom: 1rem; }
+        .cta-banner p { color: var(--silver); font-size: 1.1rem; margin-bottom: 2rem; }
+        
+        /* Contact */
+        .contact { background: var(--black-matte); }
+        .contact-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 4rem; max-width: 1200px; margin: 0 auto; }
+        .contact-info h2 { font-family: 'Montserrat', sans-serif; font-size: 2.5rem; margin-bottom: 1.5rem; }
+        .contact-info > p { color: var(--silver); line-height: 1.8; margin-bottom: 2rem; }
+        .contact-detail { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem; }
+        .contact-detail .icon { font-size: 1.5rem; }
+        .contact-detail a { color: var(--gold); text-decoration: none; transition: color 0.3s; }
+        .contact-detail a:hover { color: var(--gold-light); }
+        .contact-detail span { color: var(--silver); }
+        
+        .contact-form { background: var(--blue-dark); padding: 3rem; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.2); }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; color: var(--silver); font-size: 0.9rem; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 1rem; background: var(--black-matte); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--white); font-family: inherit; font-size: 1rem; transition: border-color 0.3s; }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--gold); }
+        .form-group textarea { min-height: 120px; resize: vertical; }
+        .form-group select option { background: var(--black-matte); }
+        
+        /* Chat Widget */
+        #chat-widget { position: fixed; bottom: 30px; right: 30px; z-index: 9999; }
+        #chat-toggle { width: 65px; height: 65px; background: var(--gradient-gold); border-radius: 50%; border: none; cursor: pointer; font-size: 1.8rem; box-shadow: 0 10px 40px rgba(212, 175, 55, 0.5); transition: all 0.3s; }
+        #chat-toggle:hover { transform: scale(1.1); box-shadow: 0 15px 50px rgba(212, 175, 55, 0.6); }
+        #chat-box { position: absolute; bottom: 85px; right: 0; width: 380px; height: 550px; background: var(--blue-dark); border-radius: 20px; border: 2px solid var(--gold); display: none; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+        #chat-box.active { display: flex; }
+        .chat-header { padding: 1rem 1.5rem; background: rgba(212, 175, 55, 0.15); border-bottom: 1px solid rgba(212, 175, 55, 0.3); display: flex; align-items: center; gap: 1rem; }
+        .chat-header .avatar { width: 45px; height: 45px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+        .chat-header h4 { font-family: 'Montserrat', sans-serif; font-size: 1rem; }
+        .chat-header span { font-size: 0.8rem; color: var(--silver); }
+        .chat-messages { flex: 1; padding: 1rem; overflow-y: auto; }
+        .chat-message { margin-bottom: 1rem; padding: 0.8rem 1rem; border-radius: 15px; font-size: 0.9rem; line-height: 1.5; max-width: 85%; }
+        .chat-message.bot { background: rgba(255,255,255,0.08); border-bottom-left-radius: 5px; }
+        .chat-message.user { background: var(--gold); color: var(--black-matte); margin-left: auto; border-bottom-right-radius: 5px; }
+        .chat-input { padding: 1rem; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 0.5rem; }
+        .chat-input input { flex: 1; padding: 0.8rem 1rem; background: var(--black-matte); border: 1px solid rgba(255,255,255,0.1); border-radius: 50px; color: var(--white); font-size: 0.9rem; }
+        .chat-input input:focus { border-color: var(--gold); }
+        .chat-input button { padding: 0.8rem 1.2rem; background: var(--gold); border: none; border-radius: 50%; cursor: pointer; font-size: 1rem; transition: transform 0.3s; }
+        .chat-input button:hover { transform: scale(1.1); }
+        
+        /* Footer */
+        footer { background: var(--blue-dark); padding: 3rem 2rem; text-align: center; border-top: 1px solid rgba(212, 175, 55, 0.2); }
+        .footer-content { max-width: 1200px; margin: 0 auto; }
+        .footer-links { display: flex; justify-content: center; gap: 2rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .footer-links a { color: var(--silver); text-decoration: none; transition: color 0.3s; }
+        .footer-links a:hover { color: var(--gold); }
+        footer p { color: var(--gray); font-size: 0.9rem; }
+        footer p a { color: var(--gold); text-decoration: none; }
+        
+        /* Reveal Animation */
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .nav-links { display: none; position: absolute; top: 100%; left: 0; right: 0; background: var(--black-matte); flex-direction: column; padding: 2rem; gap: 1rem; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
+            .nav-links.active { display: flex; }
+            .menu-toggle { display: block; }
+            .about-grid, .contact-grid { grid-template-columns: 1fr; }
+            .services-grid, .pricing-grid, .community-features, .testimonials-grid, .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            section { padding: 4rem 1.5rem; }
+            .services-grid, .pricing-grid, .community-features, .testimonials-grid, .gallery-grid { grid-template-columns: 1fr; }
+            .price-card.featured { transform: scale(1); }
+            .price-card.featured:hover { transform: translateY(-8px); }
+            #chat-box { width: calc(100vw - 40px); right: -15px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loader -->
+    <div id="loader">
+        <div class="loader-crown">👑</div>
+    </div>
+    
+    <!-- Navigation -->
+    <nav id="navbar">
+        <a href="#" class="logo">
+            <img src="https://agent-cdn.minimax.io/mcp/image_tool/output/480162612876587013/407657836060928/1781087531_78dad20d.png" alt="King Javi">
+            <div>
+                <div class="logo-text">KING JAVI</div>
+                <div class="logo-sub">3D & Game Dev</div>
+            </div>
+        </a>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#about">Sobre mí</a></li>
+            <li><a href="#services">Servicios</a></li>
+            <li><a href="#pricing">Precios</a></li>
+            <li><a href="#community">Comunidad</a></li>
+            <li><a href="#faq">FAQ</a></li>
+            <li><a href="#gallery">Alumnos</a></li>
+            <li><a href="#contact">Contacto</a></li>
+        </ul>
+        <a href="#contact" class="nav-cta">Clase GRATIS</a>
+        <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+            <span></span><span></span><span></span>
+        </button>
+    </nav>
+    
+    <!-- Hero -->
+    <section class="hero">
+        <canvas id="hero-canvas"></canvas>
+        <div class="hero-content">
+            <span class="hero-badge">👑 Rey del 3D desde 2017</span>
+            <h1>Aprende <span class="gold">3D, Rigging</span> y Desarrollo de Videojuegos</h1>
+            <p class="hero-subtitle">¿Interesado en el mundo del 3D? Conmigo puedes iniciarte y aprender los conocimientos básicos del desarrollo de videojuegos y cine de animación 3D. Clases totally prácticas para todos los niveles.</p>
+            <div class="hero-buttons">
+                <a href="#pricing" class="btn btn-gold">🎁 Primera Clase GRATIS</a>
+                <a href="#services" class="btn btn-outline">Ver Servicios</a>
+            </div>
+        </div>
+        <div class="scroll-indicator"><span></span></div>
+    </section>
+    
+    <!-- Stats -->
+    <section class="stats-bar">
+        <div class="stats-grid">
+            <div class="stat-item reveal"><h3>7+</h3><p>Años de experiencia</p></div>
+            <div class="stat-item reveal reveal-delay-1"><h3>3+</h3><p>Años dando clases</p></div>
+            <div class="stat-item reveal reveal-delay-2"><h3>∞</h3><p>Proyectos realizados</p></div>
+            <div class="stat-item reveal reveal-delay-3"><h3>100%</h3><p>Alumnos satisfechos</p></div>
+        </div>
+    </section>
+    
+    <!-- About -->
+    <section class="about" id="about">
+        <div class="section-header reveal">
+            <span class="section-tag">Sobre mí</span>
+            <h2 class="section-title">¿Quién soy?</h2>
+        </div>
+        <div class="about-grid">
+            <div class="about-image reveal">
+                <img src="https://agent-cdn.minimax.io/mcp/cdn_upload/480162612876587013/407657836060928/1781095620_4ca445db.png" alt="Javier Torralba - King Javi">
+            </div>
+            <div class="about-text reveal">
+                <h3>Javier Torralba Sánchez</h3>
+                <p>Graduado en <span class="highlight">Diseño y Desarrollo de Videojuegos</span> y titulado en <span class="highlight">Cine de Animación</span>. Llevo <span class="highlight">7 años</span> en el sector del diseño gráfico y <span class="highlight">3 años</span> dando clases particulares.</p>
+                <p>Mi filosofía es clara: <span class="highlight">aprende haciendo</span>. Las clases son totalmente prácticas donde te enseñaré a dar tus primeros pasos en el mundo del 3D y en el campo que más te guste.</p>
+                <p>Trabajo con Discord para las clases (sin webcam, compartiendo pantalla) y grabo todas las sesiones para que puedas repasar cuando quieras.</p>
+                <div class="tools-grid">
+                    <span class="tool-tag">Maya</span>
+                    <span class="tool-tag">3DS Max</span>
+                    <span class="tool-tag">Blender</span>
+                    <span class="tool-tag">ZBrush</span>
+                    <span class="tool-tag">Substance</span>
+                    <span class="tool-tag">Unity</span>
+                    <span class="tool-tag">Unreal</span>
+                    <span class="tool-tag">Photoshop</span>
+                    <span class="tool-tag">After Effects</span>
+                    <span class="tool-tag">Marmoset</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Services -->
+    <section class="services" id="services">
+        <div class="section-header reveal">
+            <span class="section-tag">Servicios</span>
+            <h2 class="section-title">¿Qué te ofrezco?</h2>
+        </div>
+        <div class="services-grid">
+            <div class="service-card reveal">
+                <div class="service-icon">🎯</div>
+                <h3>Clases Particulares Online</h3>
+                <p>Clases 100% online a través de Discord, compartiendo pantalla para que no pierdas detalle. Sin webcam, focus total en el aprendizaje.</p>
+            </div>
+            <div class="service-card reveal reveal-delay-1">
+                <div class="service-icon">📹</div>
+                <h3>Grabación de Clases</h3>
+                <p>Todas las clases se graban para que puedas repasarlas cuando quieras. Repasa dudas y refuerza lo aprendido a tu ritmo.</p>
+            </div>
+            <div class="service-card reveal reveal-delay-2">
+                <div class="service-icon">💬</div>
+                <h3>Soporte por WhatsApp</h3>
+                <p>¿Dudas entre clases? Resuélvelas por WhatsApp. Estoy para ayudarte en todo lo que puedas cumplir tus objetivos.</p>
+            </div>
+            <div class="service-card reveal">
+                <div class="service-icon">🦴</div>
+                <h3>Rigging & Animación</h3>
+                <p>Aprende a crear rigs profesionales para personajes. Deformaciones suaves, sistemas de control intuitivos y pipeline optimizado.</p>
+            </div>
+            <div class="service-card reveal reveal-delay-1">
+                <div class="service-icon">🎮</div>
+                <h3>Desarrollo de Videojuegos</h3>
+                <p>Diseño y desarrollo experiencias interactivas completas. Desde mecánicas de juego hasta implementación en Unity/Unreal.</p>
+            </div>
+            <div class="service-card reveal reveal-delay-2">
+                <div class="service-icon">🚀</div>
+                <h3>Intensivos para Proyectos</h3>
+                <p>¿Tienes un proyecto final o deadline? Preparamos intensivos a medida para que lo completes con éxito.</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Pricing -->
+    <section class="pricing" id="pricing">
+        <div class="section-header reveal">
+            <span class="section-tag">Precios</span>
+            <h2 class="section-title">Planes y Bonos</h2>
+        </div>
+        <div class="pricing-grid">
+            <div class="price-card reveal">
+                <h4>Clase Única</h4>
+                <div class="price">18€<span>/hora</span></div>
+                <ul>
+                    <li>1 hora de clase</li>
+                    <li>Grabación incluida</li>
+                    <li>Soporte WhatsApp</li>
+                    <li>Materiales PDF</li>
+                </ul>
+                <a href="#contact" class="btn btn-outline">Reservar</a>
+            </div>
+            <div class="price-card reveal reveal-delay-1">
+                <h4>Bono 5 Horas</h4>
+                <div class="price">17€<span>/hora</span></div>
+                <ul>
+                    <li>5 horas de clase</li>
+                    <li>Ahorra 5€</li>
+                    <li>Grabación incluida</li>
+                    <li>Plan personalizado</li>
+                </ul>
+                <a href="#contact" class="btn btn-outline">Reservar</a>
+            </div>
+            <div class="price-card featured reveal reveal-delay-2">
+                <span class="price-badge">MÁS POPULAR</span>
+                <h4>Bono 10 Horas</h4>
+                <div class="price">16€<span>/hora</span></div>
+                <ul>
+                    <li>10 horas de clase</li>
+                    <li>Ahorra 20€</li>
+                    <li>Grabación + ejercicios</li>
+                    <li>Plan + feedback</li>
+                </ul>
+                <a href="#contact" class="btn btn-gold">Reservar</a>
+            </div>
+            <div class="price-card reveal reveal-delay-3">
+                <h4>Grupales</h4>
+                <div class="price">8€<span>/hora/alumno</span></div>
+                <ul>
+                    <li>Desde 2 alumnos</li>
+                    <li>Ideal amigos/equipos</li>
+                    <li>Descuentos grandes</li>
+                    <li>Consultar disponibilidad</li>
+                </ul>
+                <a href="#contact" class="btn btn-outline">Consultar</a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Community -->
+    <section class="community" id="community">
+        <div class="community-content">
+            <div class="section-header reveal">
+                <span class="section-tag">Comunidad</span>
+                <h2 class="section-title">👑 King Javi Community</h2>
+            </div>
+            <p class="reveal">Más que clases, estoy creando una <strong>comunidad</strong> donde todos pueden publicar sus dudas, compartir proyectos y aprender juntos. Un espacio donde la creatividad no tiene límites.</p>
+            <div class="community-features reveal">
+                <div class="community-feature">
+                    <div class="icon">💡</div>
+                    <h4>Dudas y Preguntas</h4>
+                    <p>Publica tus preguntas y obtén respuestas de la comunidad</p>
+                </div>
+                <div class="community-feature">
+                    <div class="icon">🎨</div>
+                    <h4>Comparte Proyectos</h4>
+                    <p>Muestra tu trabajo y recibe feedback constructivo</p>
+                </div>
+                <div class="community-feature">
+                    <div class="icon">🤝</div>
+                    <h4>Colaboraciones</h4>
+                    <p>Encuentra compañeros para tus proyectos 3D</p>
+                </div>
+            </div>
+            <a href="#contact" class="btn btn-gold reveal">Unirme a la Comunidad</a>
+        </div>
+    </section>
+    
+    <!-- FAQ -->
+    <section class="faq" id="faq">
+        <div class="section-header reveal">
+            <span class="section-tag">FAQ</span>
+            <h2 class="section-title">Preguntas Frecuentes</h2>
+        </div>
+        <div class="faq-list">
+            <div class="faq-item reveal">
+                <div class="faq-question">
+                    <span>¿Necesito experiencia previa para empezar?</span>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer"><p>¡Para nada! Empezamos desde cero. Tanto si nunca has tocado un programa de 3D como si ya tienes experiencia y quieres mejorar en un área específica, adapto las clases a tu nivel.</p></div>
+            </div>
+            <div class="faq-item reveal">
+                <div class="faq-question">
+                    <span>¿Qué programa uso en las clases?</span>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer"><p>Puedo trabajar con Maya, 3DS Max, Blender, ZBrush... Elige el que prefieras o el que necesites para tu proyecto. También puedo enseñarte varios si quieres.</p></div>
+            </div>
+            <div class="faq-item reveal">
+                <div class="faq-question">
+                    <span>¿Cómo funcionan las clases por Discord?</span>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer"><p>Las clases son 100% online. Comparto mi pantalla para que veas todo en tiempo real. No usamos webcam, así que solo necesitas buen audio y conexión a internet estable.</p></div>
+            </div>
+            <div class="faq-item reveal">
+                <div class="faq-question">
+                    <span>¿Las clases se graban?</span>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer"><p>Sí, todas las clases se graban y te las paso para que puedas repasar cuando quieras. Así no pierdes detalle aunque te sulpas algo.</p></div>
+            </div>
+            <div class="faq-item reveal">
+                <div class="faq-question">
+                    <span>¿Qué niveles enseñas?</span>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer"><p>De infantil y preescolar hasta adultos y universitarios. Tengo experiencia con todas las edades y adapto la metodología a cada persona.</p></div>
+            </div>
+            <div class="faq-item reveal">
+                <div class="faq-question">
+                    <span>¿Puedo cancelar o pausar las clases?</span>
+                    <span class="icon">+</span>
+                </div>
+                <div class="faq-answer"><p>Sí, sin problema. Si necesitas parar un tiempo o cambiar el horario, hablamos y lo gestionamos. Los bonos tienen validez de 6 meses para que no haya presión.</p></div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Testimonials -->
+    <section class="testimonials" id="testimonials">
+        <div class="section-header reveal">
+            <span class="section-tag">Testimonios</span>
+            <h2 class="section-title">Lo que dicen mis alumnos</h2>
+        </div>
+        <div class="testimonials-grid">
+            <div class="testimonial-card reveal">
+                <div class="quote">"</div>
+                <div class="stars">★★★★★</div>
+                <p>Un gran profesional en su sector, las ideas muy claras y una enseñanza muy bien guiada, lo recomiendo muchísimo y además super cercano.</p>
+                <div class="author">— Alumno satisfecho</div>
+            </div>
+            <div class="testimonial-card reveal reveal-delay-1">
+                <div class="quote">"</div>
+                <div class="stars">★★★★★</div>
+                <p>Muy buen profesor, con Javi he aprendido unas buenas bases de modelado y texturizado. 100% recomendado.</p>
+                <div class="author">— Alumno de modelado</div>
+            </div>
+            <div class="testimonial-card reveal">
+                <div class="quote">"</div>
+                <div class="stars">★★★★★</div>
+                <p>Es muy responsable e intenta ayudarte en todo lo que puede y más para que cumplas tus objetivos. Además graba las clases y eso viene genial para repasar dudas.</p>
+                <div class="author">— Alumno de rigging</div>
+            </div>
+            <div class="testimonial-card reveal reveal-delay-1">
+                <div class="quote">"</div>
+                <div class="stars">★★★★★</div>
+                <p>Es un excelente profesor, resolvió todas mis dudas, me explicó como realizar todos los ejercicios de manera sencilla y todo ello en un ambiente cercano y agradable.</p>
+                <div class="author">— Alumno de animación</div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Gallery -->
+    <section class="gallery" id="gallery">
+        <div class="section-header reveal">
+            <span class="section-tag">Galería</span>
+            <h2 class="section-title">Trabajos de mis Alumnos</h2>
+        </div>
+        <div class="gallery-grid">
+            <div class="gallery-item reveal">
+                <img src="https://agent-cdn.minimax.io/mcp/cdn_upload/480162612876587013/407657836060928/1781095648_2a8d510c.png" alt="Rigby - Robot Character">
+                <div class="gallery-overlay"><h4>Rigby - Robot Character</h4><p>Diseño de personaje original</p></div>
+            </div>
+            <div class="gallery-item reveal reveal-delay-1">
+                <img src="https://agent-cdn.minimax.io/mcp/cdn_upload/480162612876587013/407657836060928/1781095644_689db683.png" alt="Futuristic 3D">
+                <div class="gallery-overlay"><h4>Concept Art 3D</h4><p>Proyecto de concepto</p></div>
+            </div>
+            <div class="gallery-item reveal reveal-delay-2">
+                <img src="https://agent-cdn.minimax.io/mcp/cdn_upload/480162612876587013/407657836060928/1781095645_2aac16d2.png" alt="Character Rigging">
+                <div class="gallery-overlay"><h4>Character Rigging</h4><p>Rig profesional</p></div>
+            </div>
+            <div class="gallery-item reveal">
+                <img src="https://agent-cdn.minimax.io/mcp/cdn_upload/480162612876587013/407657836060928/1781095647_9ab3494a.png" alt="Maya Project">
+                <div class="gallery-overlay"><h4>Proyecto Maya</h4><p>Workflow profesional</p></div>
+            </div>
+            <div class="gallery-item reveal reveal-delay-1">
+                <img src="https://agent-cdn.minimax.io/mcp/cdn_upload/480162612876587013/407657836060928/1781095650_eef003fd.png" alt="Robot Happy">
+                <div class="gallery-overlay"><h4>Rigby Happy</h4><p>Expresión de personaje</p></div>
+            </div>
+            <div class="gallery-item reveal reveal-delay-2">
+                <img src="https://agent-cdn.minimax.io/mcp/cdn_upload/480162612876587013/407657836060928/1781095651_d0188e8e.png" alt="Rigby Pointing">
+                <div class="gallery-overlay"><h4>Rigby Pointing</h4><p>Pose dinámica</p></div>
+            </div>
+        </div>
+        <div class="gallery-cta reveal">
+            <p>¿Quieres ver más trabajos? <a href="https://www.artstation.com/javielmenda" style="color: var(--gold);">Visita mi ArtStation</a></p>
+        </div>
+    </section>
+    
+    <!-- CTA Banner -->
+    <section class="cta-banner">
+        <h2 class="reveal">¿Listo para empezar tu camino en el 3D?</h2>
+        <p class="reveal">La primera clase es gratis. Sin compromiso. Descubre cómo puedo ayudarte.</p>
+        <a href="#contact" class="btn btn-gold reveal">Reservar Clase Gratis</a>
+    </section>
+    
+    <!-- Contact -->
+    <section class="contact" id="contact">
+        <div class="contact-grid">
+            <div class="contact-info reveal">
+                <h2>¿Hablamos?</h2>
+                <p>¿Tienes dudas sobre las clases, precios o proyectos? Escríbeme y te respondo lo antes posible. La primera clase es gratis, así que no tienes nada que perder.</p>
+                <div class="contact-detail"><span class="icon">📧</span><a href="mailto:javi.torralba27@gmail.com">javi.torralba27@gmail.com</a></div>
+                <div class="contact-detail"><span class="icon">💬</span><a href="#">WhatsApp (disponible para alumnos)</a></div>
+                <div class="contact-detail"><span class="icon">🎮</span><span>Clases online por Discord</span></div>
+                <div class="contact-detail"><span class="icon">📍</span><span>Toda España - Online</span></div>
+                <div class="contact-detail"><span class="icon">🌐</span><a href="https://www.artstation.com/javielmenda">Ver ArtStation</a></div>
+                <div class="contact-detail"><span class="icon">📚</span><a href="https://www.tusclasesparticulares.com/online/modelado/graduado-diseno-desarrollo-videojuegos-titulado-cine-animacion-clases-modelado-esculpido-maya-3884843">Ver perfil en TusClasesParticulares</a></div>
+            </div>
+            <div class="contact-form reveal">
+                <form id="contact-form">
+                    <div class="form-group">
+                        <label>Nombre *</label>
+                        <input type="text" placeholder="Tu nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" placeholder="tu@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>¿Qué te interesa?</label>
+                        <select>
+                            <option value="">Selecciona una opción</option>
+                            <option value="clases">Clases particulares</option>
+                            <option value="rigging">Rigging</option>
+                            <option value="modelado">Modelado 3D</option>
+                            <option value="animacion">Animación</option>
+                            <option value="videojuegos">Desarrollo de videojuegos</option>
+                            <option value="comunidad">Unirme a la comunidad</option>
+                            <option value="otro">Otro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>¿En qué puedo ayudarte?</label>
+                        <textarea placeholder="Cuéntame tu objetivo, nivel actual, qué quieres aprender..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-gold" style="width: 100%;">Enviar Mensaje</button>
+                </form>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Chat Widget -->
+    <div id="chat-widget">
+        <div id="chat-box">
+            <div class="chat-header">
+                <div class="avatar">🤖</div>
+                <div>
+                    <h4>Asistente King Javi</h4>
+                    <span>Online • Respuestas instantáneas</span>
+                </div>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="chat-message bot">¡Hola! Soy el asistente virtual de King Javi. ¿En qué puedo ayudarte hoy? Puedo responder sobre clases, precios, herramientas, rigging...</div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chatInput" placeholder="Escribe tu pregunta...">
+                <button onclick="sendMessage()">➤</button>
+            </div>
+        </div>
+        <button id="chat-toggle" onclick="toggleChat()">💬</button>
+    </div>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#about">Sobre mí</a>
+                <a href="#services">Servicios</a>
+                <a href="#pricing">Precios</a>
+                <a href="#community">Comunidad</a>
+                <a href="#faq">FAQ</a>
+                <a href="#contact">Contacto</a>
+                <a href="https://www.artstation.com/javielmenda">ArtStation</a>
+                <a href="https://www.tusclasesparticulares.com/online/modelado/graduado-diseno-desarrollo-videojuegos-titulado-cine-animacion-clases-modelado-esculpido-maya-3884843">TusClasesParticulares</a>
+            </div>
+            <p>© 2025 King Javi - Javier Torralba Sánchez | Todos los derechos reservados</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Loader
+        window.addEventListener('load', () => {
+            setTimeout(() => document.getElementById('loader').classList.add('hidden'), 800);
+        });
+        
+        // Nav scroll effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 50);
+        });
+        
+        // Mobile menu
+        document.getElementById('menuToggle').addEventListener('click', () => {
+            document.getElementById('navLinks').classList.toggle('active');
+        });
+        
+        // FAQ accordion
+        document.querySelectorAll('.faq-question').forEach(q => {
+            q.addEventListener('click', () => {
+                const item = q.parentElement;
+                item.classList.toggle('active');
+            });
+        });
+        
+        // Reveal on scroll
+        const reveals = document.querySelectorAll('.reveal');
+        const revealOnScroll = () => {
+            reveals.forEach(el => {
+                const top = el.getBoundingClientRect().top;
+                if (top < window.innerHeight - 80) el.classList.add('active');
+            });
+        };
+        window.addEventListener('scroll', revealOnScroll);
+        revealOnScroll();
+        
+        // Form submission
+        document.getElementById('contact-form').addEventListener('submit', e => {
+            e.preventDefault();
+            alert('¡Gracias por tu mensaje! Javi te responderá pronto a tu email. 🎉');
+            e.target.reset();
+        });
+        
+        // Chat
+        function toggleChat() { document.getElementById('chat-box').classList.toggle('active'); }
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+            const msgs = document.getElementById('chatMessages');
+            msgs.innerHTML += `<div class="chat-message user">${msg}</div>`;
+            input.value = '';
+            msgs.scrollTop = msgs.scrollHeight;
+            setTimeout(() => {
+                msgs.innerHTML += `<div class="chat-message bot">${getBotResponse(msg)}</div>`;
+                msgs.scrollTop = msgs.scrollHeight;
+            }, 800);
+        }
+        function getBotResponse(msg) {
+            const l = msg.toLowerCase();
+            if (l.includes('precio') || l.includes('coste')) return '¡Buena pregunta! Desde 18€/h. Con el Bono 10h ahorras 20€ (16€/h). La primera clase es GRATIS. 🎁';
+            if (l.includes('herram') || l.includes('software') || l.includes('maya') || l.includes('blender')) return 'Trabajo con Maya, 3DS Max, Blender, ZBrush, Substance, Unity, Unreal, Photoshop... ¡Lo que necesites!';
+            if (l.includes('rigging') || l.includes('rig')) return '¡Mi especialidad! Tengo años de experiencia creando rigs profesionales. Si quieres aprender, estás en el lugar correcto. 🦴';
+            if (l.includes('horar') || l.includes('cuando')) return 'Las clases se adaptan a tu horario. Normalmente 9:00 - 21:00. ¡Cuéntame qué días te vienen bien!';
+            if (l.includes('gracias')) return '¡De nada! Si tienes más dudas, aquí estoy. También puedes escribir a javi.torralba27@gmail.com';
+            return 'Interesante pregunta. Para más detalles, contacta con Javi en javi.torralba27@gmail.com. ¡Él te responde rápido! 👑';
+        }
+        document.getElementById('chatInput').addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
+        
+        // Three.js Background
+        const canvas = document.getElementById('hero-canvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        
+        // Particles
+        const pGeo = new THREE.BufferGeometry();
+        const pCount = 2000;
+        const pArr = new Float32Array(pCount * 3);
+        for (let i = 0; i < pCount * 3; i++) pArr[i] = (Math.random() - 0.5) * 12;
+        pGeo.setAttribute('position', new THREE.BufferAttribute(pArr, 3));
+        const pMat = new THREE.PointsMaterial({ size: 0.008, color: 0xD4AF37, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
+        const particles = new THREE.Points(pGeo, pMat);
+        scene.add(particles);
+        
+        // Geometric shapes
+        const shapes = [];
+        const mat1 = new THREE.MeshPhongMaterial({ color: 0xD4AF37, wireframe: true, transparent: true, opacity: 0.25 });
+        const mat2 = new THREE.MeshPhongMaterial({ color: 0x1E90FF, wireframe: true, transparent: true, opacity: 0.25 });
+        for (let i = 0; i < 12; i++) {
+            const geo = new THREE.IcosahedronGeometry(Math.random() * 0.25 + 0.08);
+            const mesh = new THREE.Mesh(geo, i % 2 ? mat1 : mat2);
+            mesh.position.set((Math.random() - 0.5) * 10, (Math.random() - 0.5) * 8, (Math.random() - 0.5) * 5 - 3);
+            mesh.userData = { rotSpeed: (Math.random() - 0.5) * 0.008, floatSpeed: Math.random() * 0.5 + 0.3, floatOff: Math.random() * Math.PI * 2 };
+            shapes.push(mesh);
+            scene.add(mesh);
+        }
+        
+        camera.position.z = 4;
+        
+        let mx = 0, my = 0;
+        document.addEventListener('mousemove', e => { mx = (e.clientX / window.innerWidth) * 2 - 1; my = -(e.clientY / window.innerHeight) * 2 + 1; });
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            const t = Date.now() * 0.001;
+            shapes.forEach(s => {
+                s.rotation.x += s.userData.rotSpeed;
+                s.rotation.y += s.userData.rotSpeed * 0.5;
+                s.position.y += Math.sin(t * s.userData.floatSpeed + s.userData.floatOff) * 0.001;
+            });
+            particles.rotation.y += 0.0003;
+            particles.rotation.x += 0.0001;
+            camera.position.x += (mx * 0.5 - camera.position.x) * 0.02;
+            camera.position.y += (my * 0.5 - camera.position.y) * 0.02;
+            renderer.render(scene, camera);
+        }
+        animate();
+        
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
