@@ -143,9 +143,19 @@ async def main():
                 pass
     finally:
         log.info("Cerrando bridge...")
-        await app.updater.stop_polling()
-        await app.stop()
-        await app.shutdown()
+        try:
+            if app.updater.running:
+                await app.updater.stop()
+        except (AttributeError, Exception) as e:
+            log.warning("updater.stop fallo (ignorado): %s", e)
+        try:
+            await app.stop()
+        except Exception as e:
+            log.warning("app.stop fallo (ignorado): %s", e)
+        try:
+            await app.shutdown()
+        except Exception as e:
+            log.warning("app.shutdown fallo (ignorado): %s", e)
         log.info("Bridge cerrado")
 
 
