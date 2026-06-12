@@ -740,18 +740,23 @@
                 <div class="contact-detail"><span class="icon">📚</span><a href="https://www.tusclasesparticulares.com/online/modelado/graduado-diseno-desarrollo-videojuegos-titulado-cine-animacion-clases-modelado-esculpido-maya-3884843">Ver perfil en TusClasesParticulares</a></div>
             </div>
             <div class="contact-form reveal">
-                <form id="contact-form">
+                <form id="contact-form" action="https://api.web3forms.com/submit" method="POST">
+                    <input type="hidden" name="access_key" value="cheZUKwK-GFDo0JXCVJhY62Q7xVHstD8qkaSUcaVaeg">
+                    <input type="hidden" name="subject" value="Nueva consulta desde KingJavi Web">
+                    <input type="hidden" name="from_name" value="King Javi Web">
+                    <input type="hidden" name="redirect" value="false">
+                    <input type="checkbox" name="botcheck" class="hidden" style="display: none;">
                     <div class="form-group">
-                        <label>Nombre *</label>
-                        <input type="text" placeholder="Tu nombre" required>
+                        <label for="nombre">Nombre *</label>
+                        <input type="text" id="nombre" name="name" placeholder="Tu nombre" required>
                     </div>
                     <div class="form-group">
-                        <label>Email *</label>
-                        <input type="email" placeholder="tu@email.com" required>
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" placeholder="tu@email.com" required>
                     </div>
                     <div class="form-group">
-                        <label>¿Qué te interesa?</label>
-                        <select>
+                        <label for="interes">¿Qué te interesa?</label>
+                        <select id="interes" name="interest">
                             <option value="">Selecciona una opción</option>
                             <option value="clases">Clases particulares</option>
                             <option value="rigging">Rigging</option>
@@ -763,10 +768,11 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>¿En qué puedo ayudarte?</label>
-                        <textarea placeholder="Cuéntame tu objetivo, nivel actual, qué quieres aprender..."></textarea>
+                        <label for="mensaje">¿En qué puedo ayudarte?</label>
+                        <textarea id="mensaje" name="message" placeholder="Cuéntame tu objetivo, nivel actual, qué quieres aprender..." rows="5"></textarea>
                     </div>
                     <button type="submit" class="btn btn-gold" style="width: 100%;">Enviar Mensaje</button>
+                    <div id="form-status" role="status" aria-live="polite" style="margin-top: 1rem;"></div>
                 </form>
             </div>
         </div>
@@ -822,16 +828,32 @@
             navbar.classList.toggle('scrolled', window.scrollY > 50);
         });
         
-        // Mobile menu
-        document.getElementById('menuToggle').addEventListener('click', () => {
-            document.getElementById('navLinks').classList.toggle('active');
-        });
+        // Mobile nav
+        const navToggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+        if (navToggle && navLinks) {
+            navToggle.addEventListener('click', () => navLinks.classList.toggle('active'));
+            navLinks.querySelectorAll('a').forEach(a => {
+                a.addEventListener('click', () => navLinks.classList.remove('active'));
+            });
+        }
         
         // FAQ accordion
         document.querySelectorAll('.faq-question').forEach(q => {
-            q.addEventListener('click', () => {
+            q.setAttribute('role', 'button');
+            q.setAttribute('tabindex', '0');
+            q.setAttribute('aria-expanded', 'false');
+            const answer = q.nextElementSibling;
+            if (answer) answer.setAttribute('aria-hidden', 'true');
+            const toggle = () => {
                 const item = q.parentElement;
-                item.classList.toggle('active');
+                const isActive = item.classList.toggle('active');
+                q.setAttribute('aria-expanded', isActive);
+                if (answer) answer.setAttribute('aria-hidden', !isActive);
+            };
+            q.addEventListener('click', toggle);
+            q.addEventListener('keydown', e => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
             });
         });
         
@@ -847,26 +869,55 @@
         revealOnScroll();
         
         // Form submission
-        document.getElementById('contact-form').addEventListener('submit', e => {
+        document.getElementById('contact-form').addEventListener('submit', async e => {
             e.preventDefault();
-            alert('¡Gracias por tu mensaje! Javi te responderá pronto a tu email. 🎉');
-            e.target.reset();
+            const status = document.getElementById('form-status');
+            const submit = e.target.querySelector('button[type="submit"]');
+            const originalText = submit.textContent;
+            submit.disabled = true;
+            submit.textContent = 'Enviando...';
+            status.textContent = '';
+            try {
+                const res = await fetch(e.target.action, {
+                    method: 'POST',
+                    body: new FormData(e.target),
+                    headers: { 'Accept': 'application/json' }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    status.textContent = '¡Gracias! Javi te responderá pronto a tu email.';
+                    status.style.color = '#4ade80';
+                    e.target.reset();
+                } else {
+                    status.textContent = 'Error: ' + (data.message || 'no se pudo enviar');
+                    status.style.color = '#ef4444';
+                }
+            } catch (err) {
+                status.textContent = 'Error de red. Intenta de nuevo o escríbeme directo por WhatsApp.';
+                status.style.color = '#ef4444';
+            } finally {
+                submit.disabled = false;
+                submit.textContent = originalText;
+            }
         });
         
         // Chat
         function toggleChat() { document.getElementById('chat-box').classList.toggle('active'); }
+        function appendChat(role, msg) {
+            const msgs = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = 'chat-message ' + role;
+            div.textContent = msg;
+            msgs.appendChild(div);
+            msgs.scrollTop = msgs.scrollHeight;
+        }
         function sendMessage() {
             const input = document.getElementById('chatInput');
             const msg = input.value.trim();
             if (!msg) return;
-            const msgs = document.getElementById('chatMessages');
-            msgs.innerHTML += `<div class="chat-message user">${msg}</div>`;
+            appendChat('user', msg);
             input.value = '';
-            msgs.scrollTop = msgs.scrollHeight;
-            setTimeout(() => {
-                msgs.innerHTML += `<div class="chat-message bot">${getBotResponse(msg)}</div>`;
-                msgs.scrollTop = msgs.scrollHeight;
-            }, 800);
+            setTimeout(() => appendChat('bot', getBotResponse(msg)), 800);
         }
         function getBotResponse(msg) {
             const l = msg.toLowerCase();
@@ -899,8 +950,8 @@
         
         // Geometric shapes
         const shapes = [];
-        const mat1 = new THREE.MeshPhongMaterial({ color: 0xD4AF37, wireframe: true, transparent: true, opacity: 0.25 });
-        const mat2 = new THREE.MeshPhongMaterial({ color: 0x1E90FF, wireframe: true, transparent: true, opacity: 0.25 });
+        const mat1 = new THREE.MeshBasicMaterial({ color: 0xD4AF37, wireframe: true, transparent: true, opacity: 0.25 });
+        const mat2 = new THREE.MeshBasicMaterial({ color: 0x1E90FF, wireframe: true, transparent: true, opacity: 0.25 });
         for (let i = 0; i < 12; i++) {
             const geo = new THREE.IcosahedronGeometry(Math.random() * 0.25 + 0.08);
             const mesh = new THREE.Mesh(geo, i % 2 ? mat1 : mat2);
