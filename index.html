@@ -14,7 +14,7 @@
     <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
     <style>
         :root {
             --gold: #D4AF37;
@@ -362,8 +362,9 @@
         footer p a { color: var(--gold); text-decoration: none; }
         
         /* Reveal Animation */
-        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
-        .reveal.active { opacity: 1; transform: translateY(0); }
+        .reveal { opacity: 1; transform: translateY(0); transition: opacity 0.8s, transform 0.8s; }
+        html.js .reveal { opacity: 0; transform: translateY(30px); }
+        html.js .reveal.active { opacity: 1; transform: translateY(0); }
         .reveal-delay-1 { transition-delay: 0.1s; }
         .reveal-delay-2 { transition-delay: 0.2s; }
         .reveal-delay-3 { transition-delay: 0.3s; }
@@ -435,9 +436,9 @@
     <section class="stats-bar">
         <div class="stats-grid">
             <div class="stat-item reveal"><h3>7+</h3><p>Años de experiencia</p></div>
-            <div class="stat-item reveal reveal-delay-1"><h3>3+</h3><p>Años dando clases</p></div>
-            <div class="stat-item reveal reveal-delay-2"><h3>∞</h3><p>Proyectos realizados</p></div>
-            <div class="stat-item reveal reveal-delay-3"><h3>100%</h3><p>Alumnos satisfechos</p></div>
+            <div class="stat-item reveal reveal-delay-1"><h3>50+</h3><p>Alumnos formados</p></div>
+            <div class="stat-item reveal reveal-delay-2"><h3>3+</h3><p>Años dando clases</p></div>
+            <div class="stat-item reveal reveal-delay-3"><h3>4.9★</h3><p>Valoración media</p></div>
         </div>
     </section>
     
@@ -816,6 +817,10 @@
         </div>
     </footer>
     
+    <script>
+        // Mark JS as available so reveal-on-scroll can take effect
+        document.documentElement.classList.add('js');
+    </script>
     <script>
         // Loader
         window.addEventListener('load', () => {

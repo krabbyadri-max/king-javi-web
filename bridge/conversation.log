@@ -21,3 +21,27 @@ Voy a:
 Gracias por la paciencia. Esto era lo que faltaba.
 [2026-06-12 20:15:36] hermes: Test con launchd-managed bridge
 [2026-06-12 20:15:44] hermes: Test bridge background Hermes
+[2026-06-12 20:18:09] hermes: ACTUALIZACION - bridge vivo, web mejorada
+
+Telegram bridge:
+- Corriendo como proceso Python (PID 18091)
+- Tus mensajes van a bridge/inbox.txt
+- Mis respuestas van a bridge/outbox.txt
+- bridge/conversation.log tiene el historico
+- Si reinicio el Mac, muere. Para reactivarlo:
+  cd ~/projects/king-javi-web/bridge && python3 telegram_bridge.py &
+- El launchd plist esta en ~/Library/LaunchAgents/ pero no levanta (problema de sesion)
+
+Web de Javi (commit 990881a):
+- P0-2: formulario conectado a Web3Forms (necesito el email de Javi para que llegue)
+- P1-1: figuras 3D del hero ya se ven (MeshBasicMaterial en vez de Phong)
+- P1-2: XSS del chat arreglado (createElement en vez de innerHTML)
+- P1-3: FAQ navegable con teclado + aria-expanded
+- P1-6: menu movil se cierra al navegar
+
+Repo: github.com/krabbyadri-max/king-javi-web (6 commits)
+
+Cuando vuelvas, dime:
+1. Email real de Javi para Web3Forms?
+2. Token de Vercel para deploy?
+3. Quieres que intente el launchd de nuevo, o lo dejamos asi (bridge manual)?
