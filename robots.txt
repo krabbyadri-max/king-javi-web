@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://krabbyadri-max.github.io/king-javi-web/sitemap.xml

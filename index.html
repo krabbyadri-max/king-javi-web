@@ -7,6 +7,8 @@
     <meta name="description" content="Aprende 3D, rigging, animación y desarrollo de videojuegos con Javier Torralba. Clases particulares online para todos los niveles. Primera clase GRATIS.">
     <meta name="keywords" content="clases 3D, rigging, animación, maya, blender, zbrush, desarrollo de videojuegos, clases online, clases particulares, profesor 3D">
     <meta name="author" content="Javier Torralba Sánchez">
+    <link rel="canonical" href="https://krabbyadri-max.github.io/king-javi-web/">
+    <meta property="og:url" content="https://krabbyadri-max.github.io/king-javi-web/">
     <meta property="og:title" content="King Javi | Clases 3D & Desarrollo de Videojuegos">
     <meta property="og:description" content="Aprende 3D, rigging y desarrollo de videojuegos con un experto. Primera clase GRATIS.">
     <meta property="og:type" content="website">
@@ -18,7 +20,7 @@
     <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer integrity="sha384-CI3ELBVUz9XQO+97x6nwMDPosPR5XvsxW2ua7N1Xeygeh1IxtgqtCkGfQY9WWdHu" crossorigin="anonymous"></script>
     <style>
         :root {
             --gold: #D4AF37;
@@ -738,7 +740,7 @@
                 <h2>¿Hablamos?</h2>
                 <p>¿Tienes dudas sobre las clases, precios o proyectos? Escríbeme y te respondo lo antes posible. La primera clase es gratis, así que no tienes nada que perder.</p>
                 <div class="contact-detail"><span class="icon">📧</span><a href="mailto:javi.torralba27@gmail.com">javi.torralba27@gmail.com</a></div>
-                <div class="contact-detail"><span class="icon">💬</span><a href="#">WhatsApp (disponible para alumnos)</a></div>
+                <div class="contact-detail"><span class="icon">💬</span><a href="#contact" title="Escríbeme por el formulario; WhatsApp directo pronto">WhatsApp (próximamente)</a></div>
                 <div class="contact-detail"><span class="icon">🎮</span><span>Clases online por Discord</span></div>
                 <div class="contact-detail"><span class="icon">📍</span><span>Toda España - Online</span></div>
                 <div class="contact-detail"><span class="icon">🌐</span><a href="https://www.artstation.com/javielmenda">Ver ArtStation</a></div>
@@ -939,8 +941,11 @@
         }
         document.getElementById('chatInput').addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
         
-        // Three.js Background
+        // Three.js Background — se omite si el usuario prefiere movimiento reducido
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const canvas = document.getElementById('hero-canvas');
+        if (!prefersReducedMotion && typeof THREE !== 'undefined') initThreeBackground();
+        function initThreeBackground() {
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
@@ -996,6 +1001,7 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
+        } // fin initThreeBackground
     </script>
 </body>
 </html>
