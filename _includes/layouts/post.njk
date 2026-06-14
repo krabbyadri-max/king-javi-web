@@ -1,0 +1,28 @@
+---
+layout: layouts/base.njk
+---
+<a href="{{ '/comunidad/' | url }}" class="blog-back">← Volver a la comunidad</a>
+
+<article>
+    <header class="blog-header">
+        <h1>{{ title }}</h1>
+        <p class="post-meta">{{ date | dateDisplay }}{% if author %} · por {{ author }}{% endif %}</p>
+        {% if tags %}
+        <div class="post-tags">
+            {% for tag in tags %}{% if tag != "posts" %}<span class="post-tag">#{{ tag }}</span>{% endif %}{% endfor %}
+        </div>
+        {% endif %}
+    </header>
+
+    <div class="post-body">
+        {{ content | safe }}
+    </div>
+
+    <!-- Comentarios: Giscus (login con GitHub).
+         Javi lo activará cuando el repo sea público / tenga Discussions.
+         Generar la config en https://giscus.app y pegar el <script> aquí. -->
+    <section class="post-comments">
+        <h2 style="font-family:'Montserrat',sans-serif;font-size:1.3rem;margin-bottom:0.5rem;">Comentarios</h2>
+        <p class="blog-empty">Los comentarios se activarán pronto (Giscus + login con GitHub).</p>
+    </section>
+</article>

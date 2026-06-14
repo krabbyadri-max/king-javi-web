@@ -6,8 +6,6 @@ tags: ["anuncio", "comunidad"]
 excerpt: "Arrancamos el blog y la comunidad. Esto es lo que vas a encontrar."
 ---
 
-# Bienvenida a la comunidad King Javi
-
 Ey, ¿qué tal? Soy Javi. Acabo de lanzar este espacio para que podamos hablar de 3D, rigging, animación y desarrollo de videojuegos sin quedarnos en el "hola, ¿cuánto cobras?".
 
 ## Qué vas a encontrar aquí

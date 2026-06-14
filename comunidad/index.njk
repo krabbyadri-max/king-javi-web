@@ -1,0 +1,26 @@
+---
+layout: layouts/base.njk
+title: Comunidad
+excerpt: "Tutoriales, renders de alumnos y charlas sobre 3D, rigging y videojuegos."
+permalink: /comunidad/index.html
+---
+
+<header class="blog-header">
+    <h1>👑 Comunidad King Javi</h1>
+    <p class="post-meta">Tutoriales, renders de alumnos y charlas sobre el oficio del 3D.</p>
+</header>
+
+{% set posts = collections.posts | reverse %}
+{% if posts | length %}
+<ul class="post-list">
+    {% for post in posts %}
+    <li class="post-list-item">
+        <h2><a href="{{ post.url | url }}">{{ post.data.title }}</a></h2>
+        <p class="post-meta">{{ post.data.date | dateDisplay }}{% if post.data.author %} · por {{ post.data.author }}{% endif %}</p>
+        {% if post.data.excerpt %}<p class="excerpt">{{ post.data.excerpt }}</p>{% endif %}
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p class="blog-empty">Todavía no hay publicaciones. ¡Vuelve pronto!</p>
+{% endif %}
