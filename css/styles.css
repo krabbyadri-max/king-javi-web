@@ -374,3 +374,25 @@
   font-style: italic;
   cursor: not-allowed;
 }
+
+/* P2-7: Iconos SVG inline (Lucide-style) */
+.icon svg,
+.icon {
+  display: inline-block;
+  vertical-align: middle;
+  width: 1.4em;
+  height: 1.4em;
+}
+.service-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  margin-bottom: 1rem;
+  color: var(--accent, #D4AF37);
+}
+.service-icon svg {
+  width: 2.25rem;
+  height: 2.25rem;
+}
