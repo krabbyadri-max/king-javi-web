@@ -367,3 +367,10 @@
             .price-card.featured:hover { transform: translateY(-8px); }
             #chat-box { width: calc(100vw - 40px); right: -15px; }
         }
+
+/* P1-5: WhatsApp placeholder hasta tener número real de Javi */
+.whatsapp-pending {
+  color: #888;
+  font-style: italic;
+  cursor: not-allowed;
+}
