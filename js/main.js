@@ -5,11 +5,11 @@
             setTimeout(() => document.getElementById('loader').classList.add('hidden'), 800);
         });
         
-        // Nav scroll effect
+        // Nav scroll effect (P2-5: passive listener)
         const navbar = document.getElementById('navbar');
         window.addEventListener('scroll', () => {
             navbar.classList.toggle('scrolled', window.scrollY > 50);
-        });
+        }, { passive: true });
         
         // Mobile nav
         const navToggle = document.getElementById('navToggle');
@@ -40,16 +40,29 @@
             });
         });
         
-        // Reveal on scroll
+        // Reveal on scroll (P2-5: IntersectionObserver replaces scroll+getBoundingClientRect)
         const reveals = document.querySelectorAll('.reveal');
-        const revealOnScroll = () => {
-            reveals.forEach(el => {
-                const top = el.getBoundingClientRect().top;
-                if (top < window.innerHeight - 80) el.classList.add('active');
-            });
-        };
-        window.addEventListener('scroll', revealOnScroll);
-        revealOnScroll();
+        if ('IntersectionObserver' in window) {
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        io.unobserve(entry.target);
+                    }
+                });
+            }, { rootMargin: '0px 0px -80px 0px', threshold: 0 });
+            reveals.forEach(el => io.observe(el));
+        } else {
+            // Fallback para navegadores sin IntersectionObserver
+            const revealOnScroll = () => {
+                reveals.forEach(el => {
+                    const top = el.getBoundingClientRect().top;
+                    if (top < window.innerHeight - 80) el.classList.add('active');
+                });
+            };
+            window.addEventListener('scroll', revealOnScroll, { passive: true });
+            revealOnScroll();
+        }
         
         // Form submission
         document.getElementById('contact-form').addEventListener('submit', async e => {
