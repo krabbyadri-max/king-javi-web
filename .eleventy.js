@@ -15,6 +15,12 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.ignores.add("index.html");
   eleventyConfig.addPassthroughCopy("index.html");
 
+  // Páginas de resultado del checkout: HTML plano, fuera del motor de plantillas.
+  eleventyConfig.ignores.add("success.html");
+  eleventyConfig.addPassthroughCopy("success.html");
+  eleventyConfig.ignores.add("cancel.html");
+  eleventyConfig.addPassthroughCopy("cancel.html");
+
   // Human-readable date for posts (es-ES).
   eleventyConfig.addFilter("dateDisplay", function (value) {
     const date = value instanceof Date ? value : new Date(value);
