@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>King Javi | Clases 3D, Rigging & Desarrollo de Videojuegos</title>
+    <link rel="preload" as="image" href="assets/img/king-javi-hero.webp">
     <meta name="description" content="Aprende 3D, rigging, animación y desarrollo de videojuegos con Javier Torralba. Clases particulares online para todos los niveles. Primera clase GRATIS.">
     <meta name="keywords" content="clases 3D, rigging, animación, maya, blender, zbrush, desarrollo de videojuegos, clases online, clases particulares, profesor 3D">
     <meta name="author" content="Javier Torralba Sánchez">
@@ -32,7 +33,7 @@
     <!-- Navigation -->
     <nav id="navbar">
         <a href="#" class="logo">
-            <img src="assets/img/king-javi-hero.webp" alt="King Javi" width="45" height="45" loading="eager">
+            <img src="assets/img/king-javi-hero.webp" alt="King Javi" width="45" height="45" fetchpriority="high">
             <div>
                 <div class="logo-text">KING JAVI</div>
                 <div class="logo-sub">3D & Game Dev</div>
@@ -53,7 +54,8 @@
             <span></span><span></span><span></span>
         </button>
     </nav>
-    
+
+    <main>
     <!-- Hero -->
     <section class="hero">
         <canvas id="hero-canvas"></canvas>
@@ -437,6 +439,8 @@
         <button id="chat-toggle" onclick="toggleChat()">💬</button>
     </div>
     
+    </main>
+
     <!-- Footer -->
     <footer>
         <div class="footer-content">
