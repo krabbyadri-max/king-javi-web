@@ -396,3 +396,11 @@
   width: 2.25rem;
   height: 2.25rem;
 }
+
+/* anime.js v4 — soporte para el reveal por palabras del H1.
+   La clase .anim-word sólo la añade JS; sin JS no existe y el H1 se ve normal.
+   inline-block permite transformar cada palabra (translateY) sin romper el wrap. */
+.anim-word {
+  display: inline-block;
+  will-change: transform, opacity;
+}

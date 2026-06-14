@@ -1,7 +1,10 @@
 module.exports = function (eleventyConfig) {
   // Static assets — copied as-is to dist/
   eleventyConfig.addPassthroughCopy("css");
-  eleventyConfig.addPassthroughCopy("js");
+  // Sólo se sirven main.js y el bundle compilado de anime.js (no la fuente
+  // anime-init.js, que usa imports bare y la compila esbuild en `build:js`).
+  eleventyConfig.addPassthroughCopy("js/main.js");
+  eleventyConfig.addPassthroughCopy("js/anime.bundle.js");
   eleventyConfig.addPassthroughCopy("assets");
   eleventyConfig.addPassthroughCopy("robots.txt");
   eleventyConfig.addPassthroughCopy("sitemap.xml");

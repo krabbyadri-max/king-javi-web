@@ -3,11 +3,16 @@
   "version": "1.0.0",
   "description": "Web de King Javi — landing + blog/comunidad (Eleventy)",
   "scripts": {
-    "build": "eleventy",
-    "serve": "eleventy --serve",
+    "build:js": "esbuild js/anime-init.js --bundle --minify --format=iife --target=es2018 --outfile=js/anime.bundle.js",
+    "build": "npm run build:js && eleventy",
+    "serve": "npm run build:js && eleventy --serve",
     "clean": "rm -rf dist"
   },
   "devDependencies": {
-    "@11ty/eleventy": "^3.0.0"
+    "@11ty/eleventy": "^3.0.0",
+    "esbuild": "^0.28.1"
+  },
+  "dependencies": {
+    "animejs": "^4.4.1"
   }
 }

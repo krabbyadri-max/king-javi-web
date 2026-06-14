@@ -1,3 +1,6 @@
 node_modules/
 dist/
 .DS_Store
+
+# Artefacto generado por esbuild (npm run build:js) — se compila en CI
+js/anime.bundle.js
