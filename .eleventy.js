@@ -5,6 +5,7 @@ module.exports = function (eleventyConfig) {
   // anime-init.js, que usa imports bare y la compila esbuild en `build:js`).
   eleventyConfig.addPassthroughCopy("js/main.js");
   eleventyConfig.addPassthroughCopy("js/anime.bundle.js");
+  eleventyConfig.addPassthroughCopy("js/payments.js");
   eleventyConfig.addPassthroughCopy("assets");
   eleventyConfig.addPassthroughCopy("robots.txt");
   eleventyConfig.addPassthroughCopy("sitemap.xml");

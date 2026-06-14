@@ -1,0 +1,13 @@
+{
+  "name": "king-javi-payments",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare Worker: Stripe Checkout + webhook para las clases de King Javi",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

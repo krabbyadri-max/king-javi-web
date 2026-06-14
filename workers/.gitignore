@@ -1,0 +1,5 @@
+node_modules/
+.wrangler/
+# Secrets locales para `wrangler dev` (NUNCA commitear)
+.dev.vars
+.env

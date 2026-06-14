@@ -169,7 +169,7 @@
                     <li>Soporte WhatsApp</li>
                     <li>Materiales PDF</li>
                 </ul>
-                <a href="#contact" class="btn btn-outline">Reservar</a>
+                <a href="#contact" data-checkout="clase_unica" class="btn btn-outline">Reservar</a>
             </div>
             <div class="price-card reveal reveal-delay-1">
                 <h3>Bono 5 Horas</h3>
@@ -180,7 +180,7 @@
                     <li>Grabación incluida</li>
                     <li>Plan personalizado</li>
                 </ul>
-                <a href="#contact" class="btn btn-outline">Reservar</a>
+                <a href="#contact" data-checkout="bono_5" class="btn btn-outline">Reservar</a>
             </div>
             <div class="price-card featured reveal reveal-delay-2">
                 <span class="price-badge">MÁS POPULAR</span>
@@ -192,7 +192,7 @@
                     <li>Grabación + ejercicios</li>
                     <li>Plan + feedback</li>
                 </ul>
-                <a href="#contact" class="btn btn-gold">Reservar</a>
+                <a href="#contact" data-checkout="bono_10" class="btn btn-gold">Reservar</a>
             </div>
             <div class="price-card reveal reveal-delay-3">
                 <h3>Grupales</h3>
@@ -460,6 +460,9 @@
     </footer>
     
     <script src="js/main.js" defer></script>
+    <!-- Pasarela de pagos: enchufa los botones de Precios a Stripe Checkout.
+         Mejora progresiva: sin este script, los botones llevan a #contact. -->
+    <script src="js/payments.js" defer></script>
     <!-- Microanimaciones anime.js v4 (bundle local tree-shaken). Si falla la
          carga, la web se ve y funciona igual: ningún estado inicial vive en CSS. -->
     <script src="js/anime.bundle.js" defer></script>

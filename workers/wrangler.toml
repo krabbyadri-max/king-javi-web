@@ -1,0 +1,18 @@
+# Configuración del Worker de pagos de King Javi.
+# Deploy:  cd workers && npx wrangler deploy
+name = "king-javi-payments"
+main = "src/index.js"
+compatibility_date = "2025-06-01"
+
+# Variables NO secretas (visibles en el panel de Cloudflare). Las claves y
+# Price IDs van como SECRETS (ver README), no aquí.
+[vars]
+SITE_URL = "https://krabbyadri-max.github.io/king-javi-web"
+
+# --- SECRETS (no se ponen aquí; se suben con `wrangler secret put`) ---
+#   STRIPE_SECRET_KEY         sk_live_... (o sk_test_... en pruebas)
+#   STRIPE_WEBHOOK_SECRET     whsec_...   (lo da Stripe al crear el webhook)
+#   STRIPE_PRICE_CLASE_UNICA  price_...   (Price ID del producto Clase Única)
+#   STRIPE_PRICE_BONO_5       price_...   (Price ID del Bono 5 Horas)
+#   STRIPE_PRICE_BONO_10      price_...   (Price ID del Bono 10 Horas)
+#   WEB3FORMS_ACCESS_KEY      la access_key de Web3Forms (avisa a Javi del pago)

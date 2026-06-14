@@ -97,8 +97,22 @@
             }
         });
         
-        // Chat
+        // ====================================================================
+        // Chat IA — habla COMO Javi vía proxy a Claude (no expone la API key).
+        // El endpoint es el Worker de Cloudflare / función de Vercel (ver api/).
+        // ⚠️  REEMPLAZA CHAT_ENDPOINT por la URL real tras desplegar el backend.
+        //   - Cloudflare: https://kingjavi-chat.<tu-subdominio>.workers.dev
+        //   - Vercel:     https://<tu-proyecto>.vercel.app/api/chat
+        // ====================================================================
+        const CHAT_ENDPOINT = 'https://kingjavi-chat.EXAMPLE.workers.dev';
+        const MAX_USER_MESSAGES = 10; // tope por sesión para no quemar presupuesto
+        const chatHistory = [];       // [{role:'user'|'assistant', content}] — NO se persiste
+        let userMsgCount = 0;
+        let chatBusy = false;
+
         function toggleChat() { document.getElementById('chat-box').classList.toggle('active'); }
+
+        // Crea una burbuja y devuelve su nodo (para poder ir rellenándolo en streaming).
         function appendChat(role, msg) {
             const msgs = document.getElementById('chatMessages');
             const div = document.createElement('div');
@@ -106,23 +120,82 @@
             div.textContent = msg;
             msgs.appendChild(div);
             msgs.scrollTop = msgs.scrollHeight;
+            return div;
         }
-        function sendMessage() {
+
+        async function sendMessage() {
             const input = document.getElementById('chatInput');
             const msg = input.value.trim();
-            if (!msg) return;
+            if (!msg || chatBusy) return;
+
+            if (userMsgCount >= MAX_USER_MESSAGES) {
+                appendChat('bot', 'Hemos hablado un montón 😄 Para seguir, escríbeme directamente a javi.torralba27@gmail.com y te respondo en menos de 24h. 👑');
+                return;
+            }
+
+            chatBusy = true;
+            userMsgCount++;
             appendChat('user', msg);
             input.value = '';
-            setTimeout(() => appendChat('bot', getBotResponse(msg)), 800);
-        }
-        function getBotResponse(msg) {
-            const l = msg.toLowerCase();
-            if (l.includes('precio') || l.includes('coste')) return '¡Buena pregunta! Desde 18€/h. Con el Bono 10h ahorras 20€ (16€/h). La primera clase es GRATIS. 🎁';
-            if (l.includes('herram') || l.includes('software') || l.includes('maya') || l.includes('blender')) return 'Trabajo con Maya, 3DS Max, Blender, ZBrush, Substance, Unity, Unreal, Photoshop... ¡Lo que necesites!';
-            if (l.includes('rigging') || l.includes('rig')) return '¡Mi especialidad! Tengo años de experiencia creando rigs profesionales. Si quieres aprender, estás en el lugar correcto. 🦴';
-            if (l.includes('horar') || l.includes('cuando')) return 'Las clases se adaptan a tu horario. Normalmente 9:00 - 21:00. ¡Cuéntame qué días te vienen bien!';
-            if (l.includes('gracias')) return '¡De nada! Si tienes más dudas, aquí estoy. También puedes escribir a javi.torralba27@gmail.com';
-            return 'Interesante pregunta. Para más detalles, contacta con Javi en javi.torralba27@gmail.com. ¡Él te responde rápido! 👑';
+            chatHistory.push({ role: 'user', content: msg });
+
+            const botDiv = appendChat('bot', '…');
+            const msgs = document.getElementById('chatMessages');
+            let answer = '';
+
+            try {
+                const res = await fetch(CHAT_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages: chatHistory })
+                });
+
+                if (!res.ok || !res.body) {
+                    let errMsg = 'Ahora mismo no puedo responder. Escríbeme a javi.torralba27@gmail.com 👑';
+                    try { const e = await res.json(); if (e && e.error) errMsg = e.error; } catch (_) {}
+                    botDiv.textContent = errMsg;
+                    chatHistory.pop(); // no dejamos el turno colgado en el historial
+                    return;
+                }
+
+                // Leemos el stream SSE de Claude (eventos content_block_delta).
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop(); // la última línea puede estar incompleta
+                    for (const line of lines) {
+                        if (!line.startsWith('data:')) continue;
+                        const payload = line.slice(5).trim();
+                        if (!payload || payload === '[DONE]') continue;
+                        try {
+                            const evt = JSON.parse(payload);
+                            if (evt.type === 'content_block_delta' && evt.delta && evt.delta.type === 'text_delta') {
+                                answer += evt.delta.text;
+                                botDiv.textContent = answer;
+                                msgs.scrollTop = msgs.scrollHeight;
+                            }
+                        } catch (_) { /* línea parcial o evento no-JSON: la ignoramos */ }
+                    }
+                }
+
+                if (answer.trim()) {
+                    chatHistory.push({ role: 'assistant', content: answer });
+                } else {
+                    botDiv.textContent = 'No me ha llegado respuesta. Prueba de nuevo o escríbeme a javi.torralba27@gmail.com 👑';
+                    chatHistory.pop();
+                }
+            } catch (err) {
+                botDiv.textContent = 'Error de conexión. Inténtalo de nuevo o escríbeme a javi.torralba27@gmail.com 👑';
+                chatHistory.pop();
+            } finally {
+                chatBusy = false;
+                input.focus();
+            }
         }
         document.getElementById('chatInput').addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
         

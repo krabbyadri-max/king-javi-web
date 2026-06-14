@@ -1,0 +1,20 @@
+# Configuración del Worker de Cloudflare (arquitectura principal).
+# Deploy:  cd api && npx wrangler deploy
+# Secret:  npx wrangler secret put ANTHROPIC_API_KEY
+# Ver api/README.md para el paso a paso completo.
+
+name = "kingjavi-chat"
+main = "chat-worker.js"
+compatibility_date = "2026-06-01"
+
+# Origen permitido para CORS. Cámbialo si cambia la URL de la web.
+# Acepta varios separados por comas, p.ej. "https://a.com,https://b.com".
+[vars]
+ALLOWED_ORIGIN = "https://krabbyadri-max.github.io"
+
+# Rate limiting opcional por IP. Descomenta tras crear el KV namespace:
+#   npx wrangler kv namespace create RATE_LIMIT
+# y pega el id que te devuelva.
+# [[kv_namespaces]]
+# binding = "RATE_LIMIT"
+# id = "PEGA_AQUI_EL_ID_DEL_KV"
